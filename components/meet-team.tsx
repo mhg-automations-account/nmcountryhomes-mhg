@@ -5,6 +5,14 @@ import type { TeamMember } from "@/lib/company";
 
 const KINDS = ["living", "porch", "kitchen", "bedroom"] as const;
 
+/** Column count matches how many cards actually render, so a team of two
+    never leaves an empty, unstyled third cell in the grid. */
+const GRID_COLS: Record<number, string> = {
+  1: "sm:grid-cols-1",
+  2: "sm:grid-cols-2",
+  3: "sm:grid-cols-3",
+};
+
 /**
  * The introduction band on the landing page: two or three of the people a
  * visitor will actually meet, then a link to the rest on `/about`.
@@ -51,7 +59,9 @@ export function MeetTeam({
         />
       </Reveal>
 
-      <div className="mt-14 grid gap-px overflow-hidden rounded-2xl bg-line sm:grid-cols-3">
+      <div
+        className={`mt-14 grid gap-px overflow-hidden rounded-2xl bg-line ${GRID_COLS[shown.length] ?? GRID_COLS[3]}`}
+      >
         {shown.map((member, i) => (
           <Reveal key={member.name} delay={i * 90} className="bg-paper">
             <div className="flex h-full flex-col">
