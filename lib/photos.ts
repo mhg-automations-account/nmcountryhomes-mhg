@@ -261,6 +261,8 @@ export const photos: Record<string, string> = {
   "page/prequalify": "/photos/homes/te3248e/kitchen.webp",
   "page/promotions": "/photos/homes/te3266d/living.webp",
   "page/address": "/photos/homes/chpr-3272h42p03/exterior.webp",
+  "page/about-team-1": "/photos/pages/about-team-1.webp",
+  "page/about-team-2": "/photos/pages/about-team-2.webp",
 };
 
 /** The photo registered for a key, or undefined when there is none. */
