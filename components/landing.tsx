@@ -460,7 +460,7 @@ export function Landing({ listingSeries, listingsHeadline, listingsLede }: Landi
               </div>
             )}
 
-            <div className="mb-6 flex items-center justify-between gap-4">
+            <div className="mb-6 flex flex-col items-center justify-center gap-4 text-center sm:flex-row">
               {/* Counts the cards actually below it, not the filter behind
                   them — a band that says seven and shows four is the kind of
                   small lie a visitor notices and generalises from. */}
