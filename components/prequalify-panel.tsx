@@ -1,21 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { prequalify } from "@/lib/prequalify";
 import { Badge, buttonStyles, cx, Icon } from "./ui";
+
+/**
+ * Re-creates real DOM nodes for an HTML snippet instead of using
+ * `dangerouslySetInnerHTML`. The DOM spec never executes a `<script>` tag
+ * that arrived via `innerHTML` — only one the browser's own parser met while
+ * reading the original document. Almost every visitor reaches `/financing`
+ * through the site's own nav, a client-side transition, so this component
+ * mounts via React's client renderer rather than a fresh HTML parse; a
+ * `dangerouslySetInnerHTML` script tag is inert on that path, which is what
+ * left the QualifyWizard panel blank. Building the script element by hand in
+ * an effect runs it on every mount, hydration or client navigation alike.
+ */
+function EmbedWidget({ html, className }: { html: string; className?: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // A snippet that is nothing but a bare `<script>` tag parses into
+    // `<head>`, not `<body>` — the HTML5 parser only switches into the body
+    // insertion mode once it meets content that isn't itself head material.
+    const parsed = new DOMParser().parseFromString(html, "text/html");
+    const nodes = [...parsed.head.childNodes, ...parsed.body.childNodes];
+    for (const node of nodes) {
+      if (node instanceof HTMLScriptElement) {
+        const script = document.createElement("script");
+        for (const attr of Array.from(node.attributes)) {
+          script.setAttribute(attr.name, attr.value);
+        }
+        script.text = node.text;
+        container.appendChild(script);
+      } else {
+        container.appendChild(node.cloneNode(true));
+      }
+    }
+
+    return () => {
+      container.replaceChildren();
+    };
+  }, [html]);
+
+  return <div ref={containerRef} className={className} />;
+}
 
 /**
  * The financing page's fast-path prequalification card: reassurance copy on
  * one side, the dealer's embedded credit-check widget on the other.
  *
- * `embedSnippet` is rendered verbatim, unconditionally, from the page's
- * first paint — QualifyWizard's `autoInstall` script does its own DOM work,
- * and browsers silently ignore that kind of work when the script was
- * inserted after the fact by client-side JS (a click handler, `next/script`)
- * rather than parsed as part of the page's original HTML. Loading it only
- * after a click, into an empty div, is what left the panel blank. The
- * "Get Pre-Qualified" button below only toggles CSS visibility: the widget
- * has already loaded underneath it by the time anyone clicks.
+ * The "Get Pre-Qualified" button only toggles CSS visibility — `EmbedWidget`
+ * loads the QualifyWizard script on mount, before anyone clicks, so it is
+ * already running underneath by the time the panel is revealed.
  *
  * Renders nothing if neither an embed nor a fallback link is configured in
  * `lib/prequalify.ts`.
@@ -73,9 +112,9 @@ export function PrequalifyPanel({ className }: { className?: string }) {
           )}
         </div>
         {hasEmbed && (
-          <div
+          <EmbedWidget
+            html={prequalify.embedSnippet!}
             className={cx("min-h-[34rem] w-full p-1", !open && "hidden")}
-            dangerouslySetInnerHTML={{ __html: prequalify.embedSnippet! }}
           />
         )}
       </div>
