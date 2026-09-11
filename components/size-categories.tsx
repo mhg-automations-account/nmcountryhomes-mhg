@@ -45,7 +45,7 @@ export function SizeCategories({
     <div
       className={cx(
         "grid grid-cols-2 gap-3 md:gap-4",
-        facets.length >= 4 ? "md:grid-cols-4" : "md:grid-cols-3",
+        facets.length >= 4 ? "md:grid-cols-4" : facets.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2",
         className,
       )}
     >
