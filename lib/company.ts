@@ -98,7 +98,7 @@ export const company: Company = {
   /* The three promises the dealership's own home page makes under its
      headline, in its words. Nothing else is claimed here. */
   badges: ["Licensed dealer", "Financing available", "Delivery included"],
-  teamSize: 5,
+  teamSize: 4,
 
   story: {
     eyebrow: "About NM Country Manufactured Homes",
@@ -137,9 +137,9 @@ export const company: Company = {
     },
   ],
 
-  /* The five people the business names publicly. Matt and Andrew publish
-     biographies; Jonathan, Jon and Edward publish a role and no more, so
-     their cards carry the role and nothing invented to fill the space. */
+  /* The four people the business names publicly. Matt and Andrew publish
+     biographies; Jon and Edward publish a role and no more, so their cards
+     carry the role and nothing invented to fill the space. */
   team: [
     {
       name: "Matt Darnell",
@@ -151,7 +151,6 @@ export const company: Company = {
       role: "CEO / Founder / Head of Logistics & Install/Construction",
       body: "A GB98-licensed contractor with fifteen years as a business owner, holding a Bachelor's in Business Administration and a Master's in Hebrew Studies. His construction expertise and detail-oriented approach are what stand behind the install and the set.",
     },
-    { name: "Jonathan Campbell", role: "Head of Sales" },
     { name: "Jon Beaty", role: "Sales & Marketing Support" },
     { name: "Edward Sapp", role: "Maintenance" },
   ],
