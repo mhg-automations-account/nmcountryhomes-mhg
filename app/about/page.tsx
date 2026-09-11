@@ -27,6 +27,16 @@ const where = `${site.address.city}, ${site.address.region}`;
 
 const sentenceCase = (s: string) => s.replace(/^./, (c) => c.toUpperCase());
 
+/** Column count matches the number of staff on file, so a two-person team
+    never leaves empty, unstyled cells where a third and fourth card would
+    have gone. */
+const TEAM_GRID_COLS: Record<number, string> = {
+  1: "sm:grid-cols-1",
+  2: "sm:grid-cols-2",
+  3: "sm:grid-cols-2 lg:grid-cols-3",
+  4: "sm:grid-cols-2 lg:grid-cols-4",
+};
+
 export const metadata: Metadata = {
   title: "About",
   description: [
@@ -172,7 +182,9 @@ export default function AboutPage() {
             />
           </Reveal>
 
-          <div className="mt-14 grid gap-px overflow-hidden rounded-2xl bg-line sm:grid-cols-2 lg:grid-cols-4">
+          <div
+            className={`mt-14 grid gap-px overflow-hidden rounded-2xl bg-line ${TEAM_GRID_COLS[Math.min(company.team.length, 4)] ?? TEAM_GRID_COLS[4]}`}
+          >
             {company.team.map((t, i) => (
               <Reveal key={t.name} delay={i * 80} className="bg-paper">
                 <div className="flex h-full flex-col">
