@@ -13,7 +13,6 @@ import {
   seriesList,
   sizeCategoryOf,
   styleLabels,
-  type ArchStyle,
   type Listing,
   type Sections,
   type SizeCategory,
@@ -33,9 +32,8 @@ type SortId = (typeof ALL_SORTS)[number]["id"];
 const SORTS = ALL_SORTS.filter((s) => hasPrices || !s.id.startsWith("price"));
 
 const SERIES = seriesList;
-const SECTIONS: Sections[] = ["single", "double", "triple"];
+const SECTIONS: Sections[] = ["single", "double"];
 const SIZES: SizeCategory[] = ["tiny", "single", "double", "triple"];
-const STYLES = Object.keys(styleLabels) as ArchStyle[];
 
 const STEP = 2500;
 const FLOOR = hasPrices ? Math.floor(priceBounds.min / STEP) * STEP : 0;
@@ -47,7 +45,6 @@ type Filters = {
   size: SizeCategory | null;
   series: string[];
   sections: string[];
-  styles: string[];
   beds: number;
   baths: number;
   min: number;
@@ -61,7 +58,6 @@ const EMPTY: Filters = {
   size: null,
   series: [],
   sections: [],
-  styles: [],
   beds: 0,
   baths: 0,
   min: FLOOR,
@@ -85,7 +81,6 @@ function fromParams(params: URLSearchParams): Filters {
       : null,
     series: list("series"),
     sections: list("sections"),
-    styles: list("style"),
     beds: int("beds", 0),
     baths: int("baths", 0),
     min: Math.min(Math.max(int("min", FLOOR), FLOOR), CEIL),
@@ -101,7 +96,6 @@ function toParams(f: Filters): string {
   if (f.size) p.set("size", f.size);
   if (f.series.length) p.set("series", f.series.join(","));
   if (f.sections.length) p.set("sections", f.sections.join(","));
-  if (f.styles.length) p.set("style", f.styles.join(","));
   if (f.beds) p.set("beds", String(f.beds));
   if (f.baths) p.set("baths", String(f.baths));
   if (f.min !== FLOOR) p.set("min", String(f.min));
@@ -117,7 +111,6 @@ function activeCount(f: Filters) {
     (f.size ? 1 : 0) +
     f.series.length +
     f.sections.length +
-    f.styles.length +
     (f.beds ? 1 : 0) +
     (f.baths ? 1 : 0) +
     (f.min !== FLOOR || f.max !== CEIL ? 1 : 0) +
@@ -184,7 +177,7 @@ export function ListingsBrowser({ listings }: { listings: Listing[] }) {
   const set = <K extends keyof Filters>(key: K, value: Filters[K]) =>
     setFilters((f) => ({ ...f, [key]: value }));
 
-  const toggleIn = (key: "series" | "sections" | "styles", value: string) =>
+  const toggleIn = (key: "series" | "sections", value: string) =>
     setFilters((f) => ({
       ...f,
       [key]: f[key].includes(value) ? f[key].filter((v) => v !== value) : [...f[key], value],
@@ -199,7 +192,6 @@ export function ListingsBrowser({ listings }: { listings: Listing[] }) {
       if (filters.series.length && !(l.series && filters.series.includes(l.series))) return false;
       if (filters.sections.length && !(l.sections && filters.sections.includes(l.sections)))
         return false;
-      if (filters.styles.length && !(l.style && filters.styles.includes(l.style))) return false;
       if (l.beds < filters.beds) return false;
       if (l.baths < filters.baths) return false;
       /* A home with no published price is not excluded by the price range —
@@ -335,16 +327,6 @@ export function ListingsBrowser({ listings }: { listings: Listing[] }) {
               onClick={() => toggleIn("sections", s)}
             >
               {sectionLabels[s].replace("-section", "")}
-            </Pill>
-          ))}
-        </div>
-      </FilterGroup>
-
-      <FilterGroup title="Style">
-        <div className="flex flex-wrap gap-2">
-          {STYLES.map((s) => (
-            <Pill key={s} active={filters.styles.includes(s)} onClick={() => toggleIn("styles", s)}>
-              {styleLabels[s]}
             </Pill>
           ))}
         </div>
