@@ -13,9 +13,11 @@
  * the applicant's credit score, and no Social Security number required to
  * get an answer.
  *
- * Ship `embedSnippet` empty and the button falls back to
- * `externalApplicationLink` instead, opening it in a new tab. Leave both
- * empty and the whole panel disappears — see `PrequalifyPanel`.
+ * With `embedSnippet` set, the widget renders directly on the page — no
+ * button in front of it. Ship `embedSnippet` empty and the panel falls back
+ * to a `buttonText` link pointing at `externalApplicationLink` instead,
+ * opening it in a new tab. Leave both empty and the whole panel disappears —
+ * see `PrequalifyPanel`.
  */
 export type Prequalify = {
   headline: string;

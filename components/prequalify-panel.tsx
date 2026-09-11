@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { prequalify } from "@/lib/prequalify";
 import { Badge, buttonStyles, cx, Icon } from "./ui";
 
@@ -52,15 +52,15 @@ function EmbedWidget({ html, className }: { html: string; className?: string }) 
  * The financing page's fast-path prequalification card: reassurance copy on
  * one side, the dealer's embedded credit-check widget on the other.
  *
- * The "Get Pre-Qualified" button only toggles CSS visibility — `EmbedWidget`
- * loads the QualifyWizard script on mount, before anyone clicks, so it is
- * already running underneath by the time the panel is revealed.
+ * The QualifyWizard form renders directly — no button gates it. `EmbedWidget`
+ * loads the QualifyWizard script on mount, and the plugin builds its own form
+ * in place, so this panel never doubles the widget's own header and copy with
+ * a separate reveal step.
  *
  * Renders nothing if neither an embed nor a fallback link is configured in
  * `lib/prequalify.ts`.
  */
 export function PrequalifyPanel({ className }: { className?: string }) {
-  const [open, setOpen] = useState(false);
   const hasEmbed = !!prequalify.embedSnippet;
   const hasLink = !!prequalify.externalApplicationLink;
 
@@ -83,23 +83,16 @@ export function PrequalifyPanel({ className }: { className?: string }) {
       </div>
 
       <div className="overflow-hidden rounded-card border border-line bg-paper">
-        <div className={cx("flex flex-col items-center gap-5 p-8 text-center sm:p-10", open && "hidden")}>
-          <span className="grid size-14 place-items-center rounded-full bg-surface-2 text-ember">
-            <Icon.Shield className="size-6" />
-          </span>
-          <p className="max-w-xs text-sm leading-relaxed text-muted">
-            Soft check only — answering these questions will not affect your credit score.
-          </p>
-          {hasEmbed ? (
-            <button
-              type="button"
-              onClick={() => setOpen(true)}
-              className={cx(buttonStyles.primary, "!px-7 !py-4 !text-base")}
-            >
-              {prequalify.buttonText}
-              <Icon.Arrow className="size-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
-            </button>
-          ) : (
+        {hasEmbed ? (
+          <EmbedWidget html={prequalify.embedSnippet!} className="min-h-[34rem] w-full p-1" />
+        ) : (
+          <div className="flex flex-col items-center gap-5 p-8 text-center sm:p-10">
+            <span className="grid size-14 place-items-center rounded-full bg-surface-2 text-ember">
+              <Icon.Shield className="size-6" />
+            </span>
+            <p className="max-w-xs text-sm leading-relaxed text-muted">
+              Soft check only — answering these questions will not affect your credit score.
+            </p>
             <a
               href={prequalify.externalApplicationLink}
               target="_blank"
@@ -109,13 +102,7 @@ export function PrequalifyPanel({ className }: { className?: string }) {
               {prequalify.buttonText}
               <Icon.Arrow className="size-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
             </a>
-          )}
-        </div>
-        {hasEmbed && (
-          <EmbedWidget
-            html={prequalify.embedSnippet!}
-            className={cx("min-h-[34rem] w-full p-1", !open && "hidden")}
-          />
+          </div>
         )}
       </div>
     </div>
