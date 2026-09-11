@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Accordion } from "@/components/accordion";
 import { PageHero } from "@/components/page-hero";
 import { PaymentCalculator } from "@/components/payment-calculator";
+import { PrequalifyPanel } from "@/components/prequalify-panel";
 import { Reveal } from "@/components/reveal";
 import {
   Badge,
@@ -17,6 +18,7 @@ import { market } from "@/lib/market";
 import { hasPrices, priceBounds } from "@/lib/homes";
 import { money } from "@/lib/format";
 import { pages } from "@/lib/page-config";
+import { prequalify } from "@/lib/prequalify";
 
 export const metadata: Metadata = {
   title: "Financing",
@@ -197,11 +199,28 @@ export default function FinancingPage() {
         ]}
       />
 
+      {/* Prequalify */}
+      <section className="border-b border-line bg-surface">
+        <Container className="py-20 sm:py-28">
+          <Reveal>
+            <SectionHeading
+              index="02"
+              eyebrow="The fast path"
+              title={prequalify.headline}
+              lede={prequalify.subtext}
+            />
+          </Reveal>
+          <Reveal delay={120} className="mt-12">
+            <PrequalifyPanel />
+          </Reveal>
+        </Container>
+      </section>
+
       {/* Paths */}
       <Section>
         <Reveal>
           <SectionHeading
-            index="02"
+            index="03"
             eyebrow="The six paths"
             title="Rates as of this quarter, plainly."
             lede="Ranges are what our buyers actually closed at in the last ninety days, not teaser rates. Your number depends on credit, term and how the home is titled."
@@ -236,7 +255,7 @@ export default function FinancingPage() {
         <Container className="py-20 sm:py-28">
           <Reveal>
             <SectionHeading
-              index="03"
+              index="04"
               eyebrow="Run it yourself"
               title="Move the sliders. Watch the gap."
               lede="Put in the price you are working with, then switch between the two loan types with everything else held constant. That difference is the whole argument for buying the land."
@@ -256,7 +275,7 @@ export default function FinancingPage() {
       <Section>
         <Reveal>
           <SectionHeading
-            index="04"
+            index="05"
             eyebrow="Order of operations"
             title="Do these in this order and nothing goes wrong."
             lede="Almost every purchase that falls apart falls apart because somebody did step four before step one."
@@ -285,7 +304,7 @@ export default function FinancingPage() {
       <section className="border-t border-line bg-surface">
         <Container className="py-20 sm:py-28">
           <Reveal>
-            <SectionHeading index="05" eyebrow="Money questions" title="Asked and answered." />
+            <SectionHeading index="06" eyebrow="Money questions" title="Asked and answered." />
           </Reveal>
           <Reveal className="mt-12">
             <Accordion items={FAQ} defaultOpen={0} />
