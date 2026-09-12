@@ -1,51 +1,80 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { prequalify } from "@/lib/prequalify";
 import { Badge, buttonStyles, cx, Icon } from "./ui";
 
 /**
- * Re-creates real DOM nodes for an HTML snippet instead of using
- * `dangerouslySetInnerHTML`. The DOM spec never executes a `<script>` tag
- * that arrived via `innerHTML` — only one the browser's own parser met while
- * reading the original document. Almost every visitor reaches `/financing`
- * through the site's own nav, a client-side transition, so this component
- * mounts via React's client renderer rather than a fresh HTML parse; a
- * `dangerouslySetInnerHTML` script tag is inert on that path, which is what
- * left the QualifyWizard panel blank. Building the script element by hand in
- * an effect runs it on every mount, hydration or client navigation alike.
+ * Embeds the dealer's raw QualifyWizard snippet inside a sandboxed iframe,
+ * instead of injecting it into this page's own document.
+ *
+ * `autoInstall` snippets like this one ship as a bare `<script src>` with no
+ * companion container element — the signature of a widget that
+ * `document.write()`s its own markup at its own position in the DOM the
+ * instant it runs, the same way it already does on the dealer's own
+ * WordPress site (manufacturedcountryhomes.com), where the tag sits
+ * directly in the raw HTML the browser parses. `document.write()` only
+ * works while *that* document's parser is still open — true for a script
+ * tag the parser meets mid-parse, never true again once the page has
+ * finished loading. A React app mounts everything after that point (a hard
+ * reload included: Next.js still hydrates, it doesn't leave the browser's
+ * original parser open), so injecting the script into this page's own
+ * document — via `dangerouslySetInnerHTML`, or a hand-built `<script>` node
+ * appended in an effect — always hits a closed parser, and the write is
+ * silently dropped or throws. It never renders, on this page, no matter how
+ * the script itself is loaded.
+ *
+ * An `srcDoc` iframe sidesteps that entirely: its content becomes a brand
+ * new document with its own parser, so the script tag inside it is met
+ * during *that* document's initial parse — exactly the condition
+ * `document.write()` needs — on every mount, hard reload or client-side
+ * navigation alike, because each mount is a fresh iframe and a fresh nested
+ * document (which also means no stale widget state or duplicate script
+ * execution can survive a navigation away and back). A `ResizeObserver` on
+ * the iframe's own document then grows the iframe to match the widget's
+ * real height instead of capping or cropping it.
  */
 function EmbedWidget({ html, className }: { html: string; className?: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [height, setHeight] = useState(0);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const iframe = iframeRef.current;
+    if (!iframe) return;
 
-    // A snippet that is nothing but a bare `<script>` tag parses into
-    // `<head>`, not `<body>` — the HTML5 parser only switches into the body
-    // insertion mode once it meets content that isn't itself head material.
-    const parsed = new DOMParser().parseFromString(html, "text/html");
-    const nodes = [...parsed.head.childNodes, ...parsed.body.childNodes];
-    for (const node of nodes) {
-      if (node instanceof HTMLScriptElement) {
-        const script = document.createElement("script");
-        for (const attr of Array.from(node.attributes)) {
-          script.setAttribute(attr.name, attr.value);
-        }
-        script.text = node.text;
-        container.appendChild(script);
-      } else {
-        container.appendChild(node.cloneNode(true));
-      }
-    }
+    let observer: ResizeObserver | undefined;
+    const attach = () => {
+      const root = iframe.contentDocument?.documentElement;
+      if (!root) return;
+      observer?.disconnect();
+      observer = new ResizeObserver(([entry]) => setHeight(Math.ceil(entry.contentRect.height)));
+      observer.observe(root);
+    };
 
+    // A hard page load server-renders this iframe as part of the page's own
+    // initial HTML, so the browser can finish navigating it to its `srcDoc`
+    // content before React ever hydrates and gets a chance to attach a
+    // `load` listener below — by then the event has already fired and won't
+    // fire again for this document. Attaching immediately covers that case;
+    // the listener covers the ordinary case where hydration wins the race.
+    if (iframe.contentDocument?.readyState === "complete") attach();
+    iframe.addEventListener("load", attach);
     return () => {
-      container.replaceChildren();
+      iframe.removeEventListener("load", attach);
+      observer?.disconnect();
+      setHeight(0);
     };
   }, [html]);
 
-  return <div ref={containerRef} className={className} />;
+  return (
+    <iframe
+      ref={iframeRef}
+      title="Prequalification form"
+      srcDoc={`<!doctype html><html><head><style>html,body{margin:0;padding:0}</style></head><body>${html}</body></html>`}
+      className={cx("block w-full border-0", className)}
+      style={height > 0 ? { height } : undefined}
+    />
+  );
 }
 
 /**
@@ -67,7 +96,7 @@ export function PrequalifyPanel({ className }: { className?: string }) {
   if (!hasEmbed && !hasLink) return null;
 
   return (
-    <div className={cx("grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-start lg:gap-16", className)}>
+    <div className={cx("grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-start lg:gap-16", className)}>
       <div>
         {prequalify.showNoSSNBadge && (
           <Badge tone="moss" className="mb-5">
@@ -82,7 +111,10 @@ export function PrequalifyPanel({ className }: { className?: string }) {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-card border border-line bg-paper">
+      {/* No `overflow-hidden` here: QualifyWizard's own markup lands inside
+          at a height this page doesn't control, and clipping it would cut
+          off fields rather than just squaring the corners. */}
+      <div className="w-full max-w-full overflow-x-hidden rounded-card border border-line bg-paper">
         {hasEmbed ? (
           <EmbedWidget html={prequalify.embedSnippet!} className="min-h-[34rem] w-full p-1" />
         ) : (
