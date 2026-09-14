@@ -6,12 +6,17 @@
  * on and off — this file is the content and embed for the separate,
  * faster-path widget that sits on the financing page itself.
  *
- * Country Homes already runs a soft-credit pre-qualification flow through
- * QualifyWizard on its own inventory site at manufacturedcountryhomes.com.
- * `embedSnippet` is that dealer's own script, copied verbatim, dealer ID
- * and all — nothing about it is guessed at. It is a soft pull: no hit to
- * the applicant's credit score, and no Social Security number required to
- * get an answer.
+ * Country Homes runs its soft-credit pre-qualification flow through
+ * QualifyWizard, which issues a separate dealer ID per domain: this site
+ * (nmcountryhomes.com) is dealer 18490, and the dealership's other,
+ * separate inventory site (manufacturedcountryhomes.com) is dealer 18491
+ * — per QualifyWizard's own onboarding email. `embedSnippet` must carry
+ * *this* site's dealer ID; the plugin checks the requesting domain against
+ * whatever ID it's given and renders nothing at all on a mismatch, which is
+ * why an earlier copy of this snippet (borrowing 18491, the other site's
+ * ID, before 18490 had been issued) showed up as a permanently blank box
+ * here. It is a soft pull: no hit to the applicant's credit score, and no
+ * Social Security number required to get an answer.
  *
  * With `embedSnippet` set, the widget renders directly on the page — no
  * button in front of it. Ship `embedSnippet` empty and the panel falls back
@@ -44,5 +49,5 @@ export const prequalify: Prequalify = {
     "Nothing about it commits you to a home or a lender. It is a starting point, not a decision — walk away from it any time, and use the number however you want.",
   ],
   embedSnippet:
-    '<script type="text/javascript" src="https://plugin.qualifywizard.com/lib/qw-plugin.js?dealerId=18491&autoInstall"></script>',
+    '<script type="text/javascript" src="https://plugin.qualifywizard.com/lib/qw-plugin.js?dealerId=18490&autoInstall"></script>',
 };
