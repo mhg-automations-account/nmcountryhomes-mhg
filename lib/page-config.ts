@@ -57,12 +57,14 @@ export const sections: Record<LandingSection, boolean> = {
   promotion: true,
   /** One photograph the width of the screen, and one sentence over it. */
   valueProp: true,
-  /** What buyers said afterwards, and a link to where they said it.
-      Off: the dealership publishes no reviews we can point a sceptic at, and
-      a testimonial band with nothing behind it is worse than none. Write the
-      quotes in `components/landing.tsx` and put `reviewsUrl` in
-      `lib/company.ts` before turning this back on. */
-  socialProof: false,
+  /** What buyers said afterwards: a live carousel of Google reviews mixed
+      with video testimonials, and a link to the Google profile they can be
+      checked against. The Google side is real — fetched by `googlePlaceId`
+      in `lib/company.ts` through `lib/reviews.ts`, never hand-written — and
+      needs `GOOGLE_PLACES_API_KEY` set to show anything. The video side
+      ships as unfilled placeholder slots (see `videoTestimonials` in
+      `lib/reviews.ts`) until recordings exist. */
+  socialProof: true,
   /** Three steps, numbered. */
   howItWorks: true,
   /** The catalogue, entered by size. */

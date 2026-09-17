@@ -47,6 +47,9 @@
  * `page/address`, `page/about`, `page/contact`, `page/saved`,
  * `page/not-found`, `page/home-closing` (the wide band under the hero),
  * `page/reviews` (behind the testimonials),
+ * `page/video-testimonial-1` … `page/video-testimonial-4` (the still frame
+ * behind each video testimonial card in that same band — see
+ * `components/reviews-marquee.tsx`),
  * `page/about-team-1` … `page/about-team-2`, and `blog/<slug>` for a post's
  * hero. Every one of those with no photograph renders as the empty plate,
  * which is the correct outcome — it is never filled with a stand-in.
