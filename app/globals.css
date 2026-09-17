@@ -293,6 +293,12 @@
   animation: hl-marquee 42s linear infinite;
 }
 
+/* Same loop, played backwards: the track travels left to right instead of
+   right to left. Used by the testimonials card marquee. */
+.animate-marquee-reverse {
+  animation: hl-marquee 48s linear infinite reverse;
+}
+
 /* The pulse on the selected county, on /land-deals */
 @keyframes hl-ping {
   0% {

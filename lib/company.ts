@@ -85,6 +85,11 @@ export type Company = {
   reviewsUrl?: string;
   /** What to call that source in the link — "Google", "Facebook". */
   reviewsLabel?: string;
+  /** The Google Place ID for this location, from the Google Business Profile.
+      `lib/reviews.ts` uses it to pull live reviews through the Places API —
+      see that file for the API key it needs. Omit it and the testimonials
+      band shows video testimonials only, with no Google reviews mixed in. */
+  googlePlaceId?: string;
 
   /** Structural warranty on a new home, in months. Omit to make no warranty claim. */
   warrantyMonths?: number;
@@ -99,6 +104,14 @@ export const company: Company = {
      headline, in its words. Nothing else is claimed here. */
   badges: ["Licensed dealer", "Financing available", "Delivery included"],
   teamSize: 2,
+
+  /* The dealership's Google Business Profile. `googlePlaceId` is what
+     `lib/reviews.ts` fetches live reviews by; `reviewsUrl` is the same
+     listing as a link a visitor can click through to and check the quotes
+     against. */
+  googlePlaceId: "ChIJMewEtKWhGIcRbj6SSJmgklY",
+  reviewsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJMewEtKWhGIcRbj6SSJmgklY",
+  reviewsLabel: "Google",
 
   story: {
     eyebrow: "About NM Country Manufactured Homes",

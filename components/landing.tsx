@@ -16,7 +16,7 @@
  * 01, 04, 07.
  */
 
-import { Fragment, type ReactNode } from "react";
+import { Fragment, Suspense, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AssemblyDiagram, assemblyLegend } from "@/components/assembly-diagram";
@@ -29,6 +29,7 @@ import { MeetTeam } from "@/components/meet-team";
 import { PromotionBanner } from "@/components/promotion-banner";
 import { QuoteForm } from "@/components/quote-form";
 import { Reveal } from "@/components/reveal";
+import { ReviewsMarquee } from "@/components/reviews-marquee";
 import { SizeCategories } from "@/components/size-categories";
 import { LocationHours } from "@/components/location-hours";
 import { VideoShowcase } from "@/components/video-showcase";
@@ -160,22 +161,6 @@ const NO_LAND_PATHS = [
     body: "A land-home package finances the parcel, the site work and the home together. More paperwork, one closing, and usually the cheapest money on the table.",
   },
 ];
-
-/**
- * Buyer quotes for the `socialProof` band.
- *
- * Empty, and the band is switched off in `lib/page-config.ts` to match.
- * Country Homes of New Mexico publishes no reviews we can point a sceptic
- * at, and a testimonial is the one piece of copy on a dealership site that
- * is worthless unless it is real — a fabricated one is a fabricated quote
- * from a named customer.
- *
- * To turn the band on: put real quotes here with the buyer's permission,
- * set `company.reviewsUrl` in `lib/company.ts` to the profile they can be
- * checked against, and flip `sections.socialProof`. All three, or none.
- */
-const TESTIMONIALS: { quote: string; name: string; detail: string }[] = [];
-
 
 export type LandingProps = {
   /** Show only this series in the listings band. Omitted: the featured slice. */
@@ -336,8 +321,7 @@ export function Landing({ listingSeries, listingsHeadline, listingsLede }: Landi
     },
     {
       key: "socialProof",
-      /* Data-gated as well as switched: no quotes, no band. */
-      show: sections.socialProof && TESTIMONIALS.length > 0,
+      show: sections.socialProof,
       render: () => (
         <section id="social-proof" className="relative overflow-hidden">
           <div className="absolute inset-0 -z-10">
@@ -360,44 +344,35 @@ export function Landing({ listingSeries, listingsHeadline, listingsLede }: Landi
                 What our customers say
               </h2>
             </div>
-
-            <div className="grid gap-6 md:grid-cols-3">
-              {TESTIMONIALS.map((t, i) => (
-                <Reveal
-                  key={i}
-                  delay={i * 100}
-                  as="figure"
-                  className="flex flex-col gap-5 rounded-2xl border border-white/15 bg-white/10 p-6 backdrop-blur-sm"
-                >
-                  <Icon.Quote className="size-6 text-accent" />
-                  <blockquote className="flex-1 leading-relaxed text-white/90">
-                    {t.quote}
-                  </blockquote>
-                  <figcaption className="border-t border-white/15 pt-4">
-                    <p className="text-sm font-semibold text-white">{t.name}</p>
-                    <p className="mt-0.5 text-xs text-white/60">{t.detail}</p>
-                  </figcaption>
-                </Reveal>
-              ))}
-            </div>
-
-            {/* The link is the point of the band: three quotes we chose
-                ourselves prove nothing, and a source we do not control proves
-                rather a lot. No `reviewsUrl` in `lib/company.ts`, no link. */}
-            {company.reviewsUrl && (
-              <div className="mt-10 text-center">
-                <a
-                  href={company.reviewsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-white transition-opacity hover:opacity-80"
-                >
-                  View all reviews on {company.reviewsLabel ?? "the web"}
-                  <Icon.External className="size-4" />
-                </a>
-              </div>
-            )}
           </Container>
+
+          {/* Full-bleed: the carousel runs edge to edge rather than stopping
+              at the container's margin. `ReviewsMarquee` fetches live Google
+              reviews itself (see `lib/reviews.ts`) and mixes in the video
+              testimonial slots, so it needs its own Suspense boundary rather
+              than blocking the rest of the band on the network round trip. */}
+          <div className="relative z-10 pb-4">
+            <Suspense fallback={null}>
+              <ReviewsMarquee />
+            </Suspense>
+          </div>
+
+          {/* The link is the point of the band: cards we curated ourselves
+              prove nothing, and a source we do not control proves rather a
+              lot. No `reviewsUrl` in `lib/company.ts`, no link. */}
+          {company.reviewsUrl && (
+            <Container className="relative z-10 mt-6 text-center">
+              <a
+                href={company.reviewsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-white transition-opacity hover:opacity-80"
+              >
+                View all reviews on {company.reviewsLabel ?? "the web"}
+                <Icon.External className="size-4" />
+              </a>
+            </Container>
+          )}
         </section>
       ),
     },
