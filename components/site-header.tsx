@@ -69,7 +69,7 @@ export function SiteHeader() {
               className="shrink-0 transition-opacity hover:opacity-80"
               aria-label={`${site.name} — home`}
             >
-              <Logo className="text-ink" />
+              <Logo />
             </Link>
 
             <nav className="ml-auto hidden items-center gap-1 lg:flex" aria-label="Primary">

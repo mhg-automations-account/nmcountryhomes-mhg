@@ -1,25 +1,18 @@
-import { site } from "@/lib/site";
+import Image from "next/image";
 import { cx } from "./ui";
+import logo from "@/public/logo.png";
 
+/**
+ * The logo artwork is black on a white plate with no transparency, so it
+ * carries its own white backing rather than inheriting `currentColor` the
+ * way the old inline SVG did. That reads seamlessly against the paper-white
+ * header in light mode; the rounded white card keeps it legible once the
+ * page (and the header background with it) goes dark.
+ */
 export function Logo({ className }: { className?: string }) {
   return (
-    <span className={cx("inline-flex items-center gap-2.5", className)}>
-      <svg viewBox="0 0 34 28" className="h-6 w-auto shrink-0" aria-hidden>
-        <path
-          d="M2 14 17 3l15 11"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path d="M7 16h20v9H7z" fill="none" stroke="currentColor" strokeWidth="2" />
-        <path d="M2 25.5h30" stroke="var(--ember)" strokeWidth="2.6" strokeLinecap="round" />
-        <rect x="14.5" y="19" width="5" height="6" fill="currentColor" opacity="0.85" />
-      </svg>
-      <span className="font-display text-[1.35rem] leading-none tracking-tight">
-        {site.short}
-      </span>
+    <span className={cx("inline-flex items-center rounded-md bg-white p-1", className)}>
+      <Image src={logo} alt="Country Homes" className="h-9 w-auto sm:h-10" priority />
     </span>
   );
 }
