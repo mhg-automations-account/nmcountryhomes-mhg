@@ -316,6 +316,20 @@ export function Landing({ listingSeries, listingsHeadline, listingsLede }: Landi
               setup handled for you.
             </p>
           </div>
+
+          {/* Two full-bleed photo bands in a row otherwise run one straight
+              into the other at the seam. This is the same wave the hero uses
+              to hand off to what follows it, reused here so the reviews band
+              below reads as its own thing rather than a continuation of this
+              one's photograph. */}
+          <div className="absolute inset-x-0 bottom-0" aria-hidden>
+            <svg viewBox="0 0 1440 120" fill="none" className="h-auto w-full">
+              <path
+                d="M0 120L48 110C96 100 192 80 288 70C384 60 480 60 576 65C672 70 768 80 864 85C960 90 1056 90 1152 85C1248 80 1344 70 1392 65L1440 60V120H0Z"
+                className="fill-paper"
+              />
+            </svg>
+          </div>
         </section>
       ),
     },
